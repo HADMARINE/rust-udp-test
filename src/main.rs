@@ -1,15 +1,9 @@
-use std::env;
 use std::net;
 
 struct TcpUdp<T, U> {
     tcp: T,
     udp: U,
 }
-
-// struct TcpUdp<T, U> {
-//     udp:tokio::net::UdpSocket,
-//     tcp:tokio::net::TcpSocket
-// }
 
 struct PortRange {
     start: u16,
@@ -25,8 +19,31 @@ struct QuickSocketInstance {
     properties: Properties,
 }
 
+struct ChannelClient {
+    uuid: String,
+    ip: String,
+    port: u16,
+}
+
+trait Channel {
+    fn emit_all(self, message: String) -> Result<String, Box<dyn std::error::Error>>;
+    fn emit_to(
+        self,
+        clients: [ChannelClient],
+        message: String,
+    ) -> Result<_, Box<dyn std::error::Error>>;
+    fn register_event_handler(
+        event: String,
+        func: dyn Fn(String) -> Result<_, Box<dyn std::error::Error>>,
+    );
+}
+
+struct TcpChannel {}
+
+struct UdpChannel {}
+
 impl QuickSocketInstance {
-    pub async fn new() -> Result<(), Box<dyn std::error::Error>> {
+    pub async fn new() -> Result<QuickSocketInstance, Box<dyn std::error::Error>> {
         use tokio::net::*;
 
         let port: u16 = 8080;
@@ -51,10 +68,14 @@ impl QuickSocketInstance {
 
         let mut instance = QuickSocketInstance { socket, properties };
 
-        Ok(())
+        Ok(instance)
     }
 
-    // fn
+    fn create_udp_channel() -> Result<u32, Box<dyn std::error::Error>> {}
+
+    fn delete_udp_channel(ch_num: u32) -> Result<_, Box<dyn std::error::Error>> {}
+
+    fn create_tcp_channel() -> Result<u32, Box<dyn std::error::Error>> {}
 }
 
 fn listen(socket: &net::UdpSocket, mut buffer: &mut [u8]) -> usize {

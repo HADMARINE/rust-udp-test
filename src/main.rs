@@ -1,36 +1,60 @@
 use std::env;
 use std::net;
 
+struct TcpUdp<T, U> {
+    tcp: T,
+    udp: U,
+}
 
-struct Sockets {
-    udp:tokio::net::UdpSocket,
-    tcp:tokio::net::TcpSocket
+// struct TcpUdp<T, U> {
+//     udp:tokio::net::UdpSocket,
+//     tcp:tokio::net::TcpSocket
+// }
+
+struct PortRange {
+    start: u16,
+    end: u16,
+}
+
+struct Properties {
+    port_range: PortRange,
 }
 
 struct QuickSocketInstance {
-    socket: Sockets
+    socket: TcpUdp<Vec<tokio::net::TcpListener>, Vec<tokio::net::UdpSocket>>,
+    properties: Properties,
 }
 
 impl QuickSocketInstance {
-    fn new() -> Result<(), Box<dyn std::error::Error>> {
+    pub async fn new() -> Result<(), Box<dyn std::error::Error>> {
         use tokio::net::*;
 
-
-        let port: u8 = 8080;
+        let port: u16 = 8080;
         let addr = format!("127.0.0.1:{}", &port);
-        let tcp_listener = TcpListener::bind(&addr).await?;
-        let udp_listener = UdpSocket::bind(&addr).await?;
-        
-        let sockets = Sockets {
-            udp, tcp
+        let default_tcp_channel = TcpListener::bind(&addr).await?;
+        // let udp_instance = UdpSocket::bind(&addr).await?;
+
+        let tcp_channels: Vec<TcpListener> = vec![default_tcp_channel];
+        let udp_channels: Vec<UdpSocket> = vec![];
+
+        let socket = TcpUdp {
+            tcp: tcp_channels,
+            udp: udp_channels,
         };
 
-        
-        let mut instance = QuickSocketInstance { 
-            socket: sockets
+        let properties = Properties {
+            port_range: PortRange {
+                start: 20000,
+                end: 65535,
+            },
         };
+
+        let mut instance = QuickSocketInstance { socket, properties };
+
+        Ok(())
     }
 
+    // fn
 }
 
 fn listen(socket: &net::UdpSocket, mut buffer: &mut [u8]) -> usize {
@@ -42,9 +66,7 @@ fn listen(socket: &net::UdpSocket, mut buffer: &mut [u8]) -> usize {
     number_of_bytes
 }
 
-
-fn send(socket:&net::)
-
+// fn send(socket:&net::)
 
 fn main() {
     println!("Hello, world!");

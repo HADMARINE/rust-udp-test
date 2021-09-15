@@ -27,18 +27,20 @@ struct ChannelClient {
 
 trait Channel {
     fn emit_all(self, message: String) -> Result<String, Box<dyn std::error::Error>>;
-    fn emit_to(
+    fn emit_to<T>(
         self,
         clients: [ChannelClient],
         message: String,
-    ) -> Result<_, Box<dyn std::error::Error>>;
-    fn register_event_handler(
+    ) -> Result<T, Box<dyn std::error::Error>>;
+    fn register_event_handler<T>(
         event: String,
-        func: dyn Fn(String) -> Result<_, Box<dyn std::error::Error>>,
+        func: dyn Fn(String) -> Result<T, Box<dyn std::error::Error>>,
     );
 }
 
-struct TcpChannel {}
+struct TcpChannel {
+    registered_client: Vec<ChannelClient>,
+}
 
 struct UdpChannel {}
 
